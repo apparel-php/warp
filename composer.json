@@ -1,0 +1,28 @@
+{
+    "name": "apparel-php/warp",
+    "description": "Web Application Routing Preprocessor",
+    "type": "library",
+    "keywords": ["routing", "router", "dispatcher", "oop", "woof"],
+    "homepage": "https://github.com/apparel-php/warp",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Apparel-PHP Project",
+            "email": "apparel-php@googlegroups.com",
+            "homepage": "https://github.com/apparel-php",
+            "role": "Maintainer"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "apparel-php/woof": ">=1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": ">=6.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Warp\\": "src"
+        }
+    }
+}
