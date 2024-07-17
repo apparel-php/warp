@@ -5,6 +5,7 @@
             <directory>../src</directory>
         </include>
         <exclude>
+            <file>../src/ControllerMapper.php</file>
         </exclude>
     </coverage>
 </phpunit>
