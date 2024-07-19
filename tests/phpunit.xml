@@ -6,6 +6,7 @@
         </include>
         <exclude>
             <file>../src/ControllerMapper.php</file>
+            <file>../src/Pattern/Token.php</file>
         </exclude>
     </coverage>
 </phpunit>
