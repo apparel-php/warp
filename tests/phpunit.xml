@@ -5,6 +5,11 @@
             <directory>../src</directory>
         </include>
         <exclude>
+            <file>../src/ControllerMapper.php</file>
+            <file>../src/NoMoreSegmentException.php</file>
+            <file>../src/Resolver.php</file>
+            <file>../src/RootPathMismatchException.php</file>
+            <file>../src/Pattern/Token.php</file>
         </exclude>
     </coverage>
 </phpunit>
