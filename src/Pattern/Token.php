@@ -14,5 +14,5 @@ interface Token
      * @param Token $nextToken 次のトークン (プレースホルダの終端判定などに使用します)
      * @return TokenMatch マッチ結果を保持するオブジェクト
      */
-    public function match(string $path, Token $nextToken = null): TokenMatch;
+    public function match(string $path, $nextToken = null): TokenMatch;
 }

@@ -272,7 +272,7 @@ class RoutingContextTest extends TestCase
      * @dataProvider provideTestMatchPath
      * @covers ::matchPath
      */
-    public function testMatchPath(string $path, string $template, array $expectedParams = null)
+    public function testMatchPath(string $path, string $template, $expectedParams = null)
     {
         $obj   = $this->createRoutingContext($path);
         $match = $obj->matchPath($template);

@@ -44,7 +44,7 @@ class PlaceholderToken implements Token
      * @param Token $nextToken 次のトークン (抽出範囲の終端を決定するために使用します)
      * @return TokenMatch マッチ結果と抽出されたパラメータを保持するオブジェクト
      */
-    public function match(string $path, Token $nextToken = null): TokenMatch
+    public function match(string $path, $nextToken = null): TokenMatch
     {
         if ($nextToken === null) {
             return ($path === "" || strpos($path, "/") !== false) ? TokenMatch::failed() : TokenMatch::matched(strlen($path), [$this->name => $path]);

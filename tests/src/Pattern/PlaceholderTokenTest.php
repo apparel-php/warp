@@ -44,7 +44,7 @@ class PlaceholderTokenTest extends TestCase
      * @dataProvider provideMatchSuccessCases
      * @covers ::match
      */
-    public function testMatchSuccess(string $name, Token $nextToken = null, string $path = "", int $expectedOffset = 0, array $expectedParams = []): void
+    public function testMatchSuccess(string $name, $nextToken = null, string $path = "", int $expectedOffset = 0, array $expectedParams = []): void
     {
         $obj   = new PlaceholderToken($name);
         $match = $obj->match($path, $nextToken);
