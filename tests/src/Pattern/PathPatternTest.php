@@ -72,7 +72,7 @@ class PathPatternTest extends TestCase
      * @dataProvider provideMatchCases
      * @covers ::match
      */
-    public function testMatch(string $template, string $path, array $expectedParams = null): void
+    public function testMatch(string $template, string $path, $expectedParams = null): void
     {
         $obj   = PathPattern::parse($template);
         $match = $obj->match($path);

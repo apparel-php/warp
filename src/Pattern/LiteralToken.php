@@ -43,7 +43,7 @@ class LiteralToken implements Token
      * @param Token $nextToken 次のトークン (このクラスでは使用しません)
      * @return TokenMatch マッチ結果を保持するオブジェクト
      */
-    public function match(string $path, Token $nextToken = null): TokenMatch
+    public function match(string $path, $nextToken = null): TokenMatch
     {
         if (strpos($path, $this->text) === 0) {
             return TokenMatch::matched(strlen($this->text));

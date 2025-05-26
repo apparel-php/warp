@@ -28,7 +28,7 @@ class Target
      *
      * @param Controller $controller 解決された Controller (存在しない場合は null)
      */
-    private function __construct(Controller $controller = null)
+    private function __construct($controller = null)
     {
         $this->controller = $controller;
     }
