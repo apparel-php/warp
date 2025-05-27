@@ -23,11 +23,12 @@ class TargetTest extends TestCase
      */
     public function testFound()
     {
-        $controller = new DummyController();
+        $controller = new DummyController("ctrl1");
         $target     = Target::found($controller);
 
         $this->assertTrue($target->isFound());
         $this->assertSame($controller, $target->getController());
+        $this->assertSame("ctrl1", $target->getController()->getId());
     }
 
     /**
@@ -68,8 +69,8 @@ class TargetTest extends TestCase
      */
     public function testMapWhenFound()
     {
-        $ctrl1  = new DummyController();
-        $ctrl2  = new DummyController();
+        $ctrl1  = new DummyController("original");
+        $ctrl2  = new DummyController("mapped");
         $mapper = new class($ctrl2, $ctrl1) implements ControllerMapper {
             public $callCount = 0;
             private $returnController;
@@ -92,6 +93,7 @@ class TargetTest extends TestCase
         $this->assertNotSame($obj1, $obj2);
         $this->assertTrue($obj2->isFound());
         $this->assertSame($ctrl2, $obj2->getController());
+        $this->assertSame("mapped", $obj2->getController()->getId());
     }
 
     /**
@@ -123,8 +125,9 @@ class TargetTest extends TestCase
      */
     public function testFlatMapWhenFound()
     {
-        $ctrl1   = new DummyController();
-        $target2 = Target::empty();
+        $ctrl1   = new DummyController("original");
+        $ctrl2   = new DummyController("flat_mapped");
+        $target2 = Target::found($ctrl2);
 
         $mapper = new class($target2) implements TargetMapper {
             public $callCount = 0;
@@ -144,6 +147,8 @@ class TargetTest extends TestCase
         $obj2 = $obj1->flatMap($mapper);
         $this->assertSame(1, $mapper->callCount);
         $this->assertSame($target2, $obj2);
+        $this->assertTrue($obj2->isFound());
+        $this->assertSame("flat_mapped", $obj2->getController()->getId());
     }
 
     /**
@@ -174,8 +179,8 @@ class TargetTest extends TestCase
      */
     public function testUnwrapOrWhenFound()
     {
-        $ctrl1 = new DummyController();
-        $ctrl2 = new DummyController();
+        $ctrl1 = new DummyController("first");
+        $ctrl2 = new DummyController("second");
         $obj   = Target::found($ctrl1);
         $this->assertSame($ctrl1, $obj->unwrapOr($ctrl2));
     }
@@ -188,7 +193,7 @@ class TargetTest extends TestCase
      */
     public function testUnwrapOrWhenEmpty()
     {
-        $ctrl = new DummyController();
+        $ctrl = new DummyController("fallback");
         $obj  = Target::empty();
         $this->assertSame($ctrl, $obj->unwrapOr($ctrl));
     }
@@ -201,7 +206,7 @@ class TargetTest extends TestCase
      */
     public function testUnwrapOrWhenFoundWithClosure()
     {
-        $ctrl1 = new DummyController();
+        $ctrl1 = new DummyController("first");
         $obj   = Target::found($ctrl1);
 
         $fallback = function () {
@@ -219,7 +224,7 @@ class TargetTest extends TestCase
      */
     public function testUnwrapOrWhenEmptyWithClosure()
     {
-        $ctrl = new DummyController();
+        $ctrl = new DummyController("fallback");
         $obj  = Target::empty();
 
         $fallback = function () use ($ctrl) {
@@ -253,6 +258,27 @@ class TargetTest extends TestCase
  */
 class DummyController implements Controller
 {
+    /**
+     * @var string
+     */
+    private $id;
+
+    /**
+     * @param string $id
+     */
+    public function __construct(string $id = "")
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
     /**
      * @param Request $request
      * @param WebEnvironment $env
