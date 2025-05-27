@@ -23,11 +23,12 @@ class TargetTest extends TestCase
      */
     public function testFound()
     {
-        $controller = new DummyController();
+        $controller = new DummyController("ctrl1");
         $target     = Target::found($controller);
 
         $this->assertTrue($target->isFound());
         $this->assertSame($controller, $target->getController());
+        $this->assertSame("ctrl1", $target->getController()->getId());
     }
 
     /**
@@ -68,8 +69,8 @@ class TargetTest extends TestCase
      */
     public function testMapWhenFound()
     {
-        $ctrl1  = new DummyController();
-        $ctrl2  = new DummyController();
+        $ctrl1  = new DummyController("original");
+        $ctrl2  = new DummyController("mapped");
         $mapper = new class($ctrl2, $ctrl1) implements ControllerMapper {
             public $callCount = 0;
             private $returnController;
@@ -92,6 +93,7 @@ class TargetTest extends TestCase
         $this->assertNotSame($obj1, $obj2);
         $this->assertTrue($obj2->isFound());
         $this->assertSame($ctrl2, $obj2->getController());
+        $this->assertSame("mapped", $obj2->getController()->getId());
     }
 
     /**
@@ -116,6 +118,60 @@ class TargetTest extends TestCase
     }
 
     /**
+     * 宛先が見つかっている状態の Target に対して flatMap() メソッドを実行した際、
+     * 指定した TargetMapper を経由して、任意の Target オブジェクトが返されることを確認します。
+     *
+     * @covers ::flatMap
+     */
+    public function testFlatMapWhenFound()
+    {
+        $ctrl1   = new DummyController("original");
+        $ctrl2   = new DummyController("flat_mapped");
+        $target2 = Target::found($ctrl2);
+
+        $mapper = new class($target2) implements TargetMapper {
+            public $callCount = 0;
+            private $returnTarget;
+            public function __construct(Target $returnTarget)
+            {
+                $this->returnTarget = $returnTarget;
+            }
+            public function map(Controller $controller): Target
+            {
+                $this->callCount++;
+                return $this->returnTarget;
+            }
+        };
+
+        $obj1 = Target::found($ctrl1);
+        $obj2 = $obj1->flatMap($mapper);
+        $this->assertSame(1, $mapper->callCount);
+        $this->assertSame($target2, $obj2);
+        $this->assertTrue($obj2->isFound());
+        $this->assertSame("flat_mapped", $obj2->getController()->getId());
+    }
+
+    /**
+     * 宛先が見つかっていない状態の Target に対して flatMap() メソッドを実行した際、
+     * Mapper が実行されず、自身と同じインスタンスが返されることを確認します。
+     *
+     * @covers ::flatMap
+     */
+    public function testFlatMapWhenEmpty()
+    {
+        $mapper = new class implements TargetMapper {
+            public function map(Controller $controller): Target
+            {
+                throw new LogicException("Mapper should not be called when target is empty.");
+            }
+        };
+
+        $obj1 = Target::empty();
+        $obj2 = $obj1->flatMap($mapper);
+        $this->assertSame($obj1, $obj2);
+    }
+
+    /**
      * 宛先が見つかっている状態の Target に対して unwrapOr() メソッドを実行した際、
      * 自身が保持している Controller が返されることを確認します。
      *
@@ -123,8 +179,8 @@ class TargetTest extends TestCase
      */
     public function testUnwrapOrWhenFound()
     {
-        $ctrl1 = new DummyController();
-        $ctrl2 = new DummyController();
+        $ctrl1 = new DummyController("first");
+        $ctrl2 = new DummyController("second");
         $obj   = Target::found($ctrl1);
         $this->assertSame($ctrl1, $obj->unwrapOr($ctrl2));
     }
@@ -137,7 +193,7 @@ class TargetTest extends TestCase
      */
     public function testUnwrapOrWhenEmpty()
     {
-        $ctrl = new DummyController();
+        $ctrl = new DummyController("fallback");
         $obj  = Target::empty();
         $this->assertSame($ctrl, $obj->unwrapOr($ctrl));
     }
@@ -150,7 +206,7 @@ class TargetTest extends TestCase
      */
     public function testUnwrapOrWhenFoundWithClosure()
     {
-        $ctrl1 = new DummyController();
+        $ctrl1 = new DummyController("first");
         $obj   = Target::found($ctrl1);
 
         $fallback = function () {
@@ -168,7 +224,7 @@ class TargetTest extends TestCase
      */
     public function testUnwrapOrWhenEmptyWithClosure()
     {
-        $ctrl = new DummyController();
+        $ctrl = new DummyController("fallback");
         $obj  = Target::empty();
 
         $fallback = function () use ($ctrl) {
@@ -202,6 +258,27 @@ class TargetTest extends TestCase
  */
 class DummyController implements Controller
 {
+    /**
+     * @var string
+     */
+    private $id;
+
+    /**
+     * @param string $id
+     */
+    public function __construct(string $id = "")
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
     /**
      * @param Request $request
      * @param WebEnvironment $env

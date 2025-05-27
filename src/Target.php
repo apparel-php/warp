@@ -100,6 +100,19 @@ class Target
     }
 
     /**
+     * 宛先が見つかっている場合、内部の Controller を指定された TargetMapper で評価し、
+     * その結果の新しい Target を返します。
+     * 宛先が見つかっていない場合は、状態を変更せずに自身をそのまま返します。
+     *
+     * @param TargetMapper $mapper 変換処理を行うマッパーオブジェクト
+     * @return self 変換後の新しい Target (見つかっていない場合は自身)
+     */
+    public function flatMap(TargetMapper $mapper): self
+    {
+        return ($this->controller === null) ? $this : $mapper->map($this->controller);
+    }
+
+    /**
      * 宛先が見つかっていたら自身の保持する Controller を返し、
      * 見つかっていなかったら引数で渡された代替の Controller またはクロージャの実行結果を返します。
      *
