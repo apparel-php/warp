@@ -116,6 +116,57 @@ class TargetTest extends TestCase
     }
 
     /**
+     * 宛先が見つかっている状態の Target に対して flatMap() メソッドを実行した際、
+     * 指定した TargetMapper を経由して、任意の Target オブジェクトが返されることを確認します。
+     *
+     * @covers ::flatMap
+     */
+    public function testFlatMapWhenFound()
+    {
+        $ctrl1   = new DummyController();
+        $target2 = Target::empty();
+
+        $mapper = new class($target2) implements TargetMapper {
+            public $callCount = 0;
+            private $returnTarget;
+            public function __construct(Target $returnTarget)
+            {
+                $this->returnTarget = $returnTarget;
+            }
+            public function map(Controller $controller): Target
+            {
+                $this->callCount++;
+                return $this->returnTarget;
+            }
+        };
+
+        $obj1 = Target::found($ctrl1);
+        $obj2 = $obj1->flatMap($mapper);
+        $this->assertSame(1, $mapper->callCount);
+        $this->assertSame($target2, $obj2);
+    }
+
+    /**
+     * 宛先が見つかっていない状態の Target に対して flatMap() メソッドを実行した際、
+     * Mapper が実行されず、自身と同じインスタンスが返されることを確認します。
+     *
+     * @covers ::flatMap
+     */
+    public function testFlatMapWhenEmpty()
+    {
+        $mapper = new class implements TargetMapper {
+            public function map(Controller $controller): Target
+            {
+                throw new LogicException("Mapper should not be called when target is empty.");
+            }
+        };
+
+        $obj1 = Target::empty();
+        $obj2 = $obj1->flatMap($mapper);
+        $this->assertSame($obj1, $obj2);
+    }
+
+    /**
      * 宛先が見つかっている状態の Target に対して unwrapOr() メソッドを実行した際、
      * 自身が保持している Controller が返されることを確認します。
      *
